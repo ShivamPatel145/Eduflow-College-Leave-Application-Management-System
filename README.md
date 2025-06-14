@@ -1,73 +1,106 @@
-# Welcome to your Lovable project
+# EduFlow - College Leave Application Management System
 
-## Project info
+A modern web application for managing college leave applications with multi-role dashboards. Built with React, TypeScript, and Vite.
 
-**URL**: https://lovable.dev/projects/91d23fec-e3b0-4cbe-8f4d-efb244f60d99
+## Features
 
-## How can I edit this code?
+- **Multi-role Dashboard System**
+  - Student Dashboard: Submit and track leave applications
+  - Faculty Dashboard: Review and approve student leave requests
+  - HOD Dashboard: Department-wide leave management
+  - Principal Dashboard: Institution-wide overview and approvals
 
-There are several ways of editing your application.
+- **Leave Management Features**
+  - Easy leave application submission
+  - Real-time application status tracking
+  - Department-wise leave overview
+  - Leave history and analytics
+  - Email notifications (coming soon)
 
-**Use Lovable**
+- **User Interface**
+  - Clean and intuitive design
+  - Responsive layout for all devices
+  - Dark/Light mode support
+  - Smooth page transitions
+  - Modern UI components with shadcn/ui
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/91d23fec-e3b0-4cbe-8f4d-efb244f60d99) and start prompting.
+## Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**
+  - React with TypeScript
+  - Vite for fast development
+  - Tailwind CSS for styling
+  - shadcn/ui for components
+  - React Context for state management
 
-**Use your preferred IDE**
+## Getting Started
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Node.js (v16 or higher)
+- npm or yarn
 
-Follow these steps:
+### Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Clone the repository:
+```bash
+git clone https://github.com/ShivamPatel145/Eduflow-College-Leave-Application-Management-System.git
+cd Eduflow-College-Leave-Application-Management-System
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install dependencies:
+```bash
+npm install
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Project Structure
 
-**Use GitHub Codespaces**
+```
+src/
+├── components/     # Reusable UI components
+├── context/       # React context providers
+├── pages/         # Page components
+│   ├── StudentDashboard.tsx
+│   ├── FacultyDashboard.tsx
+│   ├── HODDashboard.tsx
+│   └── PrincipalDashboard.tsx
+├── types/         # TypeScript type definitions
+└── lib/           # Utility functions
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Development Status
 
-## What technologies are used for this project?
+- [x] Frontend UI Implementation
+- [x] Multi-role Dashboard System
+- [x] Leave Application Forms
+- [ ] Backend API Development
+- [ ] Database Integration
+- [ ] Authentication System
+- [ ] Email Notifications
+- [ ] Testing
+- [ ] Deployment
 
-This project is built with:
+## Contributing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## How can I deploy this project?
+## License
 
-Simply open [Lovable](https://lovable.dev/projects/91d23fec-e3b0-4cbe-8f4d-efb244f60d99) and click on Share -> Publish.
+This project is licensed under the MIT License.
 
-## Can I connect a custom domain to my Lovable project?
+## Contact
 
-Yes, you can!
+Shivam Patel - [GitHub](https://github.com/ShivamPatel145)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Project Link: [https://github.com/ShivamPatel145/Eduflow-College-Leave-Application-Management-System](https://github.com/ShivamPatel145/Eduflow-College-Leave-Application-Management-System) 
