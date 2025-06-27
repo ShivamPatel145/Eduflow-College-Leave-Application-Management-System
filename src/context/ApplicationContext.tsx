@@ -33,7 +33,6 @@ export const ApplicationProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     setApplications(prev => [newApplication, ...prev]);
-    toast.success("Leave application submitted successfully");
   };
 
   const updateApplicationStatus = (

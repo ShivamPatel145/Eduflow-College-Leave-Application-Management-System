@@ -20,6 +20,7 @@ export interface LeaveApplication {
   startDate: string;
   endDate: string;
   reason: string;
+  applicationLetter: string;
   status: 'pending' | 'approved_by_faculty' | 'approved_by_hod' | 'approved' | 'rejected';
   rejectedBy?: UserRole;
   rejectionReason?: string;

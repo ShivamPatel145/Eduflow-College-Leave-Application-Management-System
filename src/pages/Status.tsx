@@ -10,12 +10,20 @@ const Status = () => {
   const { getApplicationsByStudentId, getApplicationById } = useApplication();
   const location = useLocation();
   
+  // Determine if this is the leave history page
+  const isHistory = location.pathname.includes("leave-history");
+  
   // Get application ID from URL query params
   const params = new URLSearchParams(location.search);
   const appId = params.get("id");
   
   // Get all applications for this student
-  const studentApplications = user ? getApplicationsByStudentId(user.id) : [];
+  let studentApplications = user ? getApplicationsByStudentId(user.id) : [];
+  
+  // Filter for leave history if needed
+  if (isHistory) {
+    studentApplications = studentApplications.filter(app => app.status !== "pending" && app.status !== "approved_by_faculty" && app.status !== "approved_by_hod");
+  }
   
   // Get specific application if ID is provided
   const specificApplication = appId ? getApplicationById(appId) : null;
@@ -83,8 +91,12 @@ const Status = () => {
   return (
     <div className="animate-in max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Application Status</h1>
-        <p className="text-muted-foreground">Track the progress of your leave applications</p>
+        <h1 className="text-2xl font-bold">{isHistory ? "Leave History" : "Application Status"}</h1>
+        <p className="text-muted-foreground">
+          {isHistory
+            ? "View your past approved and rejected leave applications."
+            : "Track the progress of your leave applications"}
+        </p>
       </div>
       
       {application ? (
@@ -127,110 +139,112 @@ const Status = () => {
               <Separator />
               
               {/* Application Timeline */}
-              <div>
-                <h3 className="font-medium mb-3">Application Timeline</h3>
-                <div className="space-y-6">
-                  {/* Step 1: Submitted */}
-                  <div className="flex gap-3 items-start">
-                    <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center">
-                      <CheckIcon className="h-4 w-4 text-green-700" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Application Submitted</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(application.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Step 2: Faculty Approval */}
-                  <div className="flex gap-3 items-start">
-                    {getStepStatus("faculty") === "completed" ? (
+              {!isHistory && (
+                <div>
+                  <h3 className="font-medium mb-3">Application Timeline</h3>
+                  <div className="space-y-6">
+                    {/* Step 1: Submitted */}
+                    <div className="flex gap-3 items-start">
                       <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center">
                         <CheckIcon className="h-4 w-4 text-green-700" />
                       </div>
-                    ) : getStepStatus("faculty") === "rejected" ? (
-                      <div className="h-7 w-7 rounded-full bg-red-100 flex items-center justify-center">
-                        <XIcon className="h-4 w-4 text-red-700" />
+                      <div>
+                        <p className="text-sm font-medium">Application Submitted</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(application.createdAt).toLocaleString()}
+                        </p>
                       </div>
-                    ) : getStepStatus("faculty") === "current" ? (
-                      <div className="h-7 w-7 rounded-full bg-blue-100 border-2 border-blue-400"></div>
-                    ) : (
-                      <div className="h-7 w-7 rounded-full bg-gray-100"></div>
-                    )}
-                    <div>
-                      <p className="text-sm font-medium">Faculty Approval</p>
+                    </div>
+                    
+                    {/* Step 2: Faculty Approval */}
+                    <div className="flex gap-3 items-start">
                       {getStepStatus("faculty") === "completed" ? (
-                        <p className="text-xs text-green-600">Approved</p>
+                        <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center">
+                          <CheckIcon className="h-4 w-4 text-green-700" />
+                        </div>
                       ) : getStepStatus("faculty") === "rejected" ? (
-                        <p className="text-xs text-red-600">Rejected</p>
+                        <div className="h-7 w-7 rounded-full bg-red-100 flex items-center justify-center">
+                          <XIcon className="h-4 w-4 text-red-700" />
+                        </div>
                       ) : getStepStatus("faculty") === "current" ? (
-                        <p className="text-xs text-blue-600">In Progress</p>
+                        <div className="h-7 w-7 rounded-full bg-blue-100 border-2 border-blue-400"></div>
                       ) : (
-                        <p className="text-xs text-muted-foreground">Waiting</p>
+                        <div className="h-7 w-7 rounded-full bg-gray-100"></div>
                       )}
+                      <div>
+                        <p className="text-sm font-medium">Faculty Approval</p>
+                        {getStepStatus("faculty") === "completed" ? (
+                          <p className="text-xs text-green-600">Approved</p>
+                        ) : getStepStatus("faculty") === "rejected" ? (
+                          <p className="text-xs text-red-600">Rejected</p>
+                        ) : getStepStatus("faculty") === "current" ? (
+                          <p className="text-xs text-blue-600">In Progress</p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Waiting</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                  {/* Step 3: HOD Approval */}
-                  <div className="flex gap-3 items-start">
-                    {getStepStatus("hod") === "completed" ? (
-                      <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center">
-                        <CheckIcon className="h-4 w-4 text-green-700" />
-                      </div>
-                    ) : getStepStatus("hod") === "rejected" ? (
-                      <div className="h-7 w-7 rounded-full bg-red-100 flex items-center justify-center">
-                        <XIcon className="h-4 w-4 text-red-700" />
-                      </div>
-                    ) : getStepStatus("hod") === "current" ? (
-                      <div className="h-7 w-7 rounded-full bg-blue-100 border-2 border-blue-400"></div>
-                    ) : (
-                      <div className="h-7 w-7 rounded-full bg-gray-100"></div>
-                    )}
-                    <div>
-                      <p className="text-sm font-medium">HOD Approval</p>
+                    
+                    {/* Step 3: HOD Approval */}
+                    <div className="flex gap-3 items-start">
                       {getStepStatus("hod") === "completed" ? (
-                        <p className="text-xs text-green-600">Approved</p>
+                        <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center">
+                          <CheckIcon className="h-4 w-4 text-green-700" />
+                        </div>
                       ) : getStepStatus("hod") === "rejected" ? (
-                        <p className="text-xs text-red-600">Rejected</p>
+                        <div className="h-7 w-7 rounded-full bg-red-100 flex items-center justify-center">
+                          <XIcon className="h-4 w-4 text-red-700" />
+                        </div>
                       ) : getStepStatus("hod") === "current" ? (
-                        <p className="text-xs text-blue-600">In Progress</p>
+                        <div className="h-7 w-7 rounded-full bg-blue-100 border-2 border-blue-400"></div>
                       ) : (
-                        <p className="text-xs text-muted-foreground">Waiting</p>
+                        <div className="h-7 w-7 rounded-full bg-gray-100"></div>
                       )}
+                      <div>
+                        <p className="text-sm font-medium">HOD Approval</p>
+                        {getStepStatus("hod") === "completed" ? (
+                          <p className="text-xs text-green-600">Approved</p>
+                        ) : getStepStatus("hod") === "rejected" ? (
+                          <p className="text-xs text-red-600">Rejected</p>
+                        ) : getStepStatus("hod") === "current" ? (
+                          <p className="text-xs text-blue-600">In Progress</p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Waiting</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                  {/* Step 4: Principal Approval */}
-                  <div className="flex gap-3 items-start">
-                    {getStepStatus("principal") === "completed" ? (
-                      <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center">
-                        <CheckIcon className="h-4 w-4 text-green-700" />
-                      </div>
-                    ) : getStepStatus("principal") === "rejected" ? (
-                      <div className="h-7 w-7 rounded-full bg-red-100 flex items-center justify-center">
-                        <XIcon className="h-4 w-4 text-red-700" />
-                      </div>
-                    ) : getStepStatus("principal") === "current" ? (
-                      <div className="h-7 w-7 rounded-full bg-blue-100 border-2 border-blue-400"></div>
-                    ) : (
-                      <div className="h-7 w-7 rounded-full bg-gray-100"></div>
-                    )}
-                    <div>
-                      <p className="text-sm font-medium">Principal Approval</p>
+                    
+                    {/* Step 4: Principal Approval */}
+                    <div className="flex gap-3 items-start">
                       {getStepStatus("principal") === "completed" ? (
-                        <p className="text-xs text-green-600">Approved</p>
+                        <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center">
+                          <CheckIcon className="h-4 w-4 text-green-700" />
+                        </div>
                       ) : getStepStatus("principal") === "rejected" ? (
-                        <p className="text-xs text-red-600">Rejected</p>
+                        <div className="h-7 w-7 rounded-full bg-red-100 flex items-center justify-center">
+                          <XIcon className="h-4 w-4 text-red-700" />
+                        </div>
                       ) : getStepStatus("principal") === "current" ? (
-                        <p className="text-xs text-blue-600">In Progress</p>
+                        <div className="h-7 w-7 rounded-full bg-blue-100 border-2 border-blue-400"></div>
                       ) : (
-                        <p className="text-xs text-muted-foreground">Waiting</p>
+                        <div className="h-7 w-7 rounded-full bg-gray-100"></div>
                       )}
+                      <div>
+                        <p className="text-sm font-medium">Principal Approval</p>
+                        {getStepStatus("principal") === "completed" ? (
+                          <p className="text-xs text-green-600">Approved</p>
+                        ) : getStepStatus("principal") === "rejected" ? (
+                          <p className="text-xs text-red-600">Rejected</p>
+                        ) : getStepStatus("principal") === "current" ? (
+                          <p className="text-xs text-blue-600">In Progress</p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Waiting</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
               
               {/* Rejection Reason (if rejected) */}
               {application.status === "rejected" && (
@@ -259,7 +273,9 @@ const Status = () => {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <h3 className="text-lg font-medium mb-2">No applications found</h3>
             <p className="text-muted-foreground mb-4 text-center">
-              You haven't submitted any leave applications yet
+              {isHistory
+                ? "You have no approved or rejected leave applications yet."
+                : "You haven't submitted any leave applications yet"}
             </p>
           </CardContent>
         </Card>
@@ -268,7 +284,7 @@ const Status = () => {
       {/* All Applications List */}
       {studentApplications.length > 1 && !specificApplication && (
         <div className="mt-8">
-          <h2 className="text-lg font-medium mb-4">Previous Applications</h2>
+          <h2 className="text-lg font-medium mb-4">{isHistory ? "Previous Leave History" : "Previous Applications"}</h2>
           <div className="space-y-4">
             {studentApplications.slice(1).map(app => (
               <Card key={app.id} className="overflow-hidden">

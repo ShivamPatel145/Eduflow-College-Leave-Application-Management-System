@@ -1,166 +1,254 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useApplication } from "@/context/ApplicationContext";
-import { useAuth } from "@/context/AuthContext";
-import { FileTextIcon } from "lucide-react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import {
+  FileTextIcon,
+  ClockIcon,
+  BuildingIcon,
+  CheckCircleIcon,
+  EyeIcon,
+  BarChart3Icon,
+  AlertTriangleIcon
+} from "lucide-react";
+import { DashboardStatCard } from "@/components/ui/DashboardStatCard";
+import { DashboardQuickAction } from "@/components/ui/DashboardQuickAction";
+import { DashboardApplicationRow } from "@/components/ui/DashboardApplicationRow";
 import { Button } from "@/components/ui/button";
-import { departments } from "@/data/mockData";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
+
+const usePrincipalDashboardData = () => {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any[]>([]);
+  const [pendingApplications, setPendingApplications] = useState<any[]>([]);
+  const [quickActions, setQuickActions] = useState<any[]>([]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setStats([
+        {
+          title: "Total Applications",
+          value: "156",
+          icon: FileTextIcon,
+          description: "This month",
+          color: "text-blue-600",
+          bgColor: "bg-blue-50"
+        },
+        {
+          title: "Pending Reviews",
+          value: "12",
+          icon: ClockIcon,
+          description: "Need attention",
+          color: "text-yellow-600",
+          bgColor: "bg-yellow-50"
+        },
+        {
+          title: "Departments",
+          value: "8",
+          icon: BuildingIcon,
+          description: "Active departments",
+          color: "text-green-600",
+          bgColor: "bg-green-50"
+        },
+        {
+          title: "Institution Rate",
+          value: "92%",
+          icon: CheckCircleIcon,
+          description: "Overall approval rate",
+          color: "text-purple-600",
+          bgColor: "bg-purple-50"
+        }
+      ]);
+      setPendingApplications([
+        {
+          id: "APP001",
+          studentName: "John Doe",
+          department: "Computer Science",
+          facultyName: "Dr. Smith",
+          type: "Medical Leave",
+          startDate: "2024-01-15",
+          endDate: "2024-01-17",
+          days: 3,
+          status: "hod_approved"
+        },
+        {
+          id: "APP002",
+          studentName: "Jane Smith",
+          department: "Electrical Engineering",
+          facultyName: "Prof. Johnson",
+          type: "Personal Leave",
+          startDate: "2024-01-20",
+          endDate: "2024-01-22",
+          days: 3,
+          status: "hod_approved"
+        },
+        {
+          id: "APP003",
+          studentName: "Mike Johnson",
+          department: "Mechanical Engineering",
+          facultyName: "Dr. Brown",
+          type: "Academic Leave",
+          startDate: "2024-01-25",
+          endDate: "2024-01-26",
+          days: 2,
+          status: "hod_approved"
+        }
+      ]);
+      setQuickActions([
+        {
+          title: "Review Applications",
+          description: "Process pending requests",
+          icon: EyeIcon,
+          href: "/view-applications",
+          color: "text-blue-600",
+          bgColor: "bg-blue-50 hover:bg-blue-100"
+        },
+        {
+          title: "Department Overview",
+          description: "View all departments",
+          icon: BuildingIcon,
+          href: "/department-overview",
+          color: "text-green-600",
+          bgColor: "bg-green-50 hover:bg-green-100"
+        },
+        {
+          title: "Institution Reports",
+          description: "Generate analytics",
+          icon: BarChart3Icon,
+          href: "/reports",
+          color: "text-purple-600",
+          bgColor: "bg-purple-50 hover:bg-purple-100"
+        }
+      ]);
+      setLoading(false);
+    }, 900);
+  }, []);
+
+  return { loading, stats, pendingApplications, quickActions };
+};
+
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case "hod_approved":
+      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">HOD Approved</Badge>;
+    case "pending":
+      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pending</Badge>;
+    default:
+      return <Badge variant="secondary">Unknown</Badge>;
+  }
+};
 
 const PrincipalDashboard = () => {
-  const { user } = useAuth();
-  const { getAllApplications } = useApplication();
-  
-  // Get all applications
-  const allApplications = getAllApplications();
-  
-  // Filter applications by status
-  const pendingPrincipalApproval = allApplications.filter(app => 
-    app.status === "approved_by_hod"
-  );
-  const approvedApplications = allApplications.filter(app => 
-    app.status === "approved"
-  );
-  const rejectedApplications = allApplications.filter(app => 
-    app.status === "rejected"
-  );
-  
-  // Group applications by department
-  const applicationsByDepartment = departments.map(dept => {
-    const deptApps = allApplications.filter(app => app.department === dept.name);
-    return {
-      department: dept.name,
-      count: deptApps.length,
-      pending: deptApps.filter(a => a.status === "approved_by_hod").length
-    };
-  });
-  
+  const { loading, stats, pendingApplications, quickActions } = usePrincipalDashboardData();
+  console.log("Principal Stats icons:", stats.map(s => s.icon));
+  console.log("Principal QuickActions icons:", quickActions.map(q => q.icon));
+
   return (
-    <div className="animate-in">
-      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.name}</h1>
-          <p className="text-muted-foreground">
-            Principal's Dashboard - College Application Management System
-          </p>
+          <h1 className="text-xl font-bold text-gray-900">Principal Dashboard</h1>
+          <p className="text-gray-600 mt-1">Institution-wide leave application management.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <Button asChild size="sm">
           <Link to="/view-applications">
-            <Button className="bg-cams-600 hover:bg-cams-700">
-              <FileTextIcon className="mr-2 h-4 w-4" />
-              Review Applications
-            </Button>
+            <EyeIcon className="h-4 w-4 mr-2" />
+            Review Applications
           </Link>
-        </div>
+        </Button>
       </div>
-      
-      <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{allApplications.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pending Your Approval</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingPrincipalApproval.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Approved</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{approvedApplications.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{rejectedApplications.length}</div>
-          </CardContent>
-        </Card>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-gray-100 h-24 rounded-lg" />
+            ))
+          : stats.map((stat, index) => (
+              <DashboardStatCard
+                key={index}
+                title={stat.title}
+                value={stat.value}
+                description={stat.description}
+                icon={stat.icon}
+                color={stat.color}
+                bgColor={stat.bgColor}
+              />
+            ))}
       </div>
-      
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Your Approval</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {pendingPrincipalApproval.length > 0 ? (
-              <div className="space-y-4">
-                {pendingPrincipalApproval.slice(0, 5).map((application) => (
-                  <div key={application.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                    <div>
-                      <p className="font-medium">{application.studentName}</p>
-                      <div className="flex flex-col gap-1 sm:flex-row sm:gap-2 text-sm text-muted-foreground">
-                        <p>{application.department}</p>
-                        <span className="hidden sm:block">•</span>
-                        <p>{application.year} Year, {application.section}</p>
-                        <span className="hidden sm:block">•</span>
-                        <p>{new Date(application.startDate).toLocaleDateString()} - {new Date(application.endDate).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to={`/view-applications?id=${application.id}`}>Review</Link>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6">
-                <p className="text-muted-foreground">No applications pending your approval</p>
-              </div>
-            )}
-            
-            {pendingPrincipalApproval.length > 5 && (
-              <CardFooter className="pt-4 px-0">
-                <Link to="/view-applications" className="text-sm text-cams-600 hover:underline">
-                  View all pending applications ({pendingPrincipalApproval.length})
-                </Link>
-              </CardFooter>
-            )}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Department Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {applicationsByDepartment.map((dept, index) => (
-                <div key={index} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
-                  <div className="font-medium">{dept.department}</div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Total: </span>
-                      <span>{dept.count}</span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Pending: </span>
-                      <span className={dept.pending > 0 ? "text-cams-600 font-medium" : ""}>{dept.pending}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Pending Applications */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="p-4 border-b">
+              <h2 className="text-base font-semibold">Pending Applications</h2>
+              <p className="text-sm text-gray-500">Applications awaiting principal review</p>
             </div>
-          </CardContent>
-          <CardFooter>
-            <Link to="/department-overview">
-              <Button variant="outline" className="w-full">View Detailed Report</Button>
-            </Link>
-          </CardFooter>
-        </Card>
+            <div className="p-4 space-y-2">
+              {loading
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="animate-pulse bg-gray-100 h-14 rounded-lg" />
+                  ))
+                : pendingApplications.map((app) => (
+                    <DashboardApplicationRow
+                      key={app.id}
+                      leftIcon={
+                        <div className="p-1.5 rounded-lg bg-yellow-100">
+                          <AlertTriangleIcon className="h-3.5 w-3.5 text-yellow-600" />
+                        </div>
+                      }
+                      mainInfo={
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm">{app.studentName}</p>
+                          <p className="text-xs text-gray-500">
+                            {app.type} • {app.startDate} - {app.endDate} ({app.days} days)
+                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5">{app.department} • {app.facultyName}</p>
+                        </div>
+                      }
+                      rightSection={
+                        <>
+                          {getStatusBadge(app.status)}
+                          <Button variant="outline" size="sm" className="h-6 px-2 text-xs">
+                            Review
+                          </Button>
+                        </>
+                      }
+                    />
+                  ))}
+            </div>
+            <div className="p-4 border-t">
+              <Button variant="outline" size="sm" asChild className="w-full text-xs">
+                <Link to="/view-applications">View All Pending</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+        {/* Quick Actions */}
+        <div>
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="p-4 border-b">
+              <h2 className="text-base font-semibold">Quick Actions</h2>
+              <p className="text-sm text-gray-500">Common tasks and shortcuts</p>
+            </div>
+            <div className="p-4 space-y-2">
+              {loading
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="animate-pulse bg-gray-100 h-14 rounded-lg" />
+                  ))
+                : quickActions.map((action, index) => (
+                    <DashboardQuickAction
+                      key={index}
+                      title={action.title}
+                      description={action.description}
+                      icon={action.icon}
+                      href={action.href}
+                      color={action.color}
+                      bgColor={action.bgColor}
+                    />
+                  ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

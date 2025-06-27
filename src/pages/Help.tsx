@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { ChevronDown, ChevronUp, Mail, MessageSquare, Phone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+import { pageFade, cardMotion, buttonMotion } from "@/lib/motion";
 
 const faqs = [
   {
@@ -68,92 +70,132 @@ const Help = () => {
   };
 
   return (
-    <div className="animate-in max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Help & Support</h1>
-        <p className="text-muted-foreground">Find answers to common questions or contact support</p>
-      </div>
+    <motion.div className="max-w-4xl mx-auto px-4 py-10 min-h-[80vh]" {...pageFade}>
+      <motion.div
+        className="mb-8 text-center"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
+      >
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Help & Support</h1>
+        <p className="text-lg text-gray-600 dark:text-gray-300">Find answers to common questions or contact support</p>
+      </motion.div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Frequently Asked Questions</CardTitle>
-            <CardDescription>
-              Quick answers to common questions about the College Application Management System
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {faqs.map((faq, index) => (
-              <Collapsible
-                key={index}
-                open={openFAQ === index}
-                onOpenChange={() => toggleFAQ(index)}
-                className="border rounded-md"
-              >
-                <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left font-medium">
-                  {faq.question}
-                  {openFAQ === index ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-4 pb-4 pt-0 text-sm text-muted-foreground">
-                  {faq.answer}
-                </CollapsibleContent>
-              </Collapsible>
-            ))}
-          </CardContent>
-        </Card>
+      <div className="grid gap-8 md:grid-cols-3">
+        <motion.div className="md:col-span-2" {...cardMotion}>
+          <Card className="border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-gray-900 dark:text-gray-100">Frequently Asked Questions</CardTitle>
+              <CardDescription className="dark:text-gray-400">
+                Quick answers to common questions about the College Application Management System
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  layout
+                  initial={false}
+                  animate={{ borderRadius: openFAQ === index ? 16 : 8, boxShadow: openFAQ === index ? '0 4px 24px 0 rgba(80,80,120,0.08)' : '0 1px 4px 0 rgba(80,80,120,0.03)' }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  className={
+                    `overflow-hidden border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800 transition-shadow duration-300`
+                  }
+                >
+                  <Collapsible
+                    open={openFAQ === index}
+                    onOpenChange={() => toggleFAQ(index)}
+                  >
+                    <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left font-medium text-gray-900 dark:text-gray-100 focus:outline-none transition-colors">
+                      {faq.question}
+                      <motion.span
+                        initial={false}
+                        animate={{ rotate: openFAQ === index ? 180 : 0 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                      >
+                        {openFAQ === index ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </motion.span>
+                    </CollapsibleTrigger>
+                    <AnimatePresence initial={false}>
+                      {openFAQ === index && (
+                        <CollapsibleContent asChild forceMount>
+                          <motion.div
+                            key="faq-content"
+                            initial={{ opacity: 0, y: -8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={{ duration: 0.25 }}
+                            className="px-4 pb-4 pt-0 text-sm text-gray-700 dark:text-gray-300"
+                          >
+                            {faq.answer}
+                          </motion.div>
+                        </CollapsibleContent>
+                      )}
+                    </AnimatePresence>
+                  </Collapsible>
+                </motion.div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Need Help?</CardTitle>
-            <CardDescription>Send us a message and we'll get back to you</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Input
-                  name="subject"
-                  placeholder="Subject"
-                  value={contactForm.subject}
-                  onChange={handleChange}
-                  required
-                />
+        <motion.div {...cardMotion}>
+          <Card className="border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-gray-900 dark:text-gray-100">Need Help?</CardTitle>
+              <CardDescription className="dark:text-gray-400">Send us a message and we'll get back to you</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Input
+                    name="subject"
+                    placeholder="Subject"
+                    value={contactForm.subject}
+                    onChange={handleChange}
+                    required
+                    className="bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-gray-100"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Textarea
+                    name="message"
+                    placeholder="Your message..."
+                    value={contactForm.message}
+                    onChange={handleChange}
+                    required
+                    className="min-h-[120px] bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-gray-100"
+                  />
+                </div>
+                <motion.div {...buttonMotion}>
+                  <Button type="submit" className="w-full">
+                    Send Message
+                  </Button>
+                </motion.div>
+              </form>
+            </CardContent>
+            <CardFooter className="flex flex-col items-start gap-2 text-sm">
+              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                <Mail className="h-4 w-4" />
+                <span>support@college.edu</span>
               </div>
-              <div className="space-y-2">
-                <Textarea
-                  name="message"
-                  placeholder="Your message..."
-                  value={contactForm.message}
-                  onChange={handleChange}
-                  required
-                  className="min-h-[120px]"
-                />
+              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                <Phone className="h-4 w-4" />
+                <span>+1 (555) 123-4567</span>
               </div>
-              <Button type="submit" className="w-full">
-                Send Message
-              </Button>
-            </form>
-          </CardContent>
-          <CardFooter className="flex flex-col items-start gap-2 text-sm">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              <span>support@college.edu</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4" />
-              <span>+1 (555) 123-4567</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              <span>Live chat: 9 AM - 5 PM (Weekdays)</span>
-            </div>
-          </CardFooter>
-        </Card>
+              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                <MessageSquare className="h-4 w-4" />
+                <span>Live chat: 9 AM - 5 PM (Weekdays)</span>
+              </div>
+            </CardFooter>
+          </Card>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

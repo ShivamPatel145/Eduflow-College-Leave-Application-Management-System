@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { useNotification } from "@/context/NotificationContext";
 import { motion, AnimatePresence, useScroll, useSpring, useTransform } from "framer-motion";
-import { ArrowRight, CheckCircle2, Clock, FileCheck, GraduationCap, Users, Shield, Award, BookOpen, Star, Menu, Bell, User, LogOut, Github, Twitter, Linkedin } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, FileCheck, GraduationCap, Users, Shield, Award, BookOpen, Star, Menu, Bell, User, LogOut, Github, Twitter, Linkedin, Moon, Sun } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { pageFade, cardMotion, buttonMotion } from "@/lib/motion";
 
 // Professional SVG Illustrations
 const HeroSVG = () => (
@@ -346,11 +348,17 @@ const BenefitCard = ({ icon: Icon, title, description }) => (
 const Home = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
+  const { unreadCount } = useNotification();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const profileRef = useRef<HTMLDivElement>(null);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -359,12 +367,17 @@ const Home = () => {
     restDelta: 0.001
   });
 
-  const headerBackground = useTransform(
-    scrollYProgress,
-    [0, 0.1],
-    ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.8)']
-  );
-
+  const headerBackground = useTransform(scrollYProgress, (scroll) => {
+    if (isDark) {
+      return scroll < 0.1
+        ? 'rgba(24, 24, 27, 0)'
+        : 'rgba(24, 24, 27, 0.8)';
+    } else {
+      return scroll < 0.1
+        ? 'rgba(255, 255, 255, 0)'
+        : 'rgba(255, 255, 255, 0.8)';
+    }
+  });
   const headerShadow = useTransform(
     scrollYProgress,
     [0, 0.1],
@@ -410,6 +423,14 @@ const Home = () => {
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -588,6 +609,17 @@ const Home = () => {
             ))}
           </nav>
           <div className="flex items-center gap-4">
+            <motion.button
+              type="button"
+              aria-label="Toggle theme"
+              className="rounded-full p-2 hover:bg-primary/10 transition-colors"
+              onClick={() => setIsDark((d) => !d)}
+              animate={{ rotate: isDark ? 180 : 0 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              {...buttonMotion}
+            >
+              {isDark ? <Sun className="h-5 w-5 text-primary" /> : <Moon className="h-5 w-5 text-primary" />}
+            </motion.button>
             {isAuthenticated ? (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
@@ -602,14 +634,14 @@ const Home = () => {
                   className="relative p-2 rounded-full text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Bell className="h-5 w-5" />
-                  {unreadNotifications > 0 && (
+                  {unreadCount > 0 && (
                     <motion.span
                       className="absolute top-1 right-1 h-4 w-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     >
-                      {unreadNotifications}
+                      {unreadCount}
                     </motion.span>
                   )}
                 </motion.button>
@@ -670,7 +702,10 @@ const Home = () => {
                 className="flex items-center gap-3"
               >
                 <Link to="/login">
-                  <Button variant="ghost" className="text-muted-foreground hover:text-primary">
+                  <Button
+                    variant="ghost"
+                    className="text-muted-foreground hover:text-black focus:text-black dark:hover:text-black dark:focus:text-black"
+                  >
                     Login
                   </Button>
                 </Link>
@@ -724,6 +759,19 @@ const Home = () => {
                     {item.label}
                   </motion.button>
                 ))}
+                <div className="flex justify-end pb-2">
+                  <motion.button
+                    type="button"
+                    aria-label="Toggle theme"
+                    className="rounded-full p-2 hover:bg-primary/10 transition-colors"
+                    onClick={() => setIsDark((d) => !d)}
+                    animate={{ rotate: isDark ? 180 : 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                    {...buttonMotion}
+                  >
+                    {isDark ? <Sun className="h-5 w-5 text-primary" /> : <Moon className="h-5 w-5 text-primary" />}
+                  </motion.button>
+                </div>
                 {isAuthenticated ? (
                   <div className="pt-2 border-t mt-2 flex flex-col gap-2">
                     <button
@@ -749,7 +797,10 @@ const Home = () => {
                 ) : (
                   <div className="pt-2 border-t mt-2 flex flex-col gap-2">
                     <Link to="/login">
-                      <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-primary">
+                      <Button
+                        variant="ghost"
+                        className="text-muted-foreground hover:text-black focus:text-black dark:hover:text-black dark:focus:text-black"
+                      >
                         Login
                       </Button>
                     </Link>

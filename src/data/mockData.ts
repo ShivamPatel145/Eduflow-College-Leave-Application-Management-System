@@ -1,4 +1,3 @@
-
 import { Department, LeaveApplication, User } from "@/types";
 
 export const departments: Department[] = [
@@ -52,6 +51,7 @@ export const mockApplications: LeaveApplication[] = [
     startDate: "2025-05-10",
     endDate: "2025-05-12",
     reason: "Family function",
+    applicationLetter: "I am requesting leave for a family function from 10th to 12th May.",
     status: "pending",
     createdAt: "2025-05-08T10:30:00Z",
     updatedAt: "2025-05-08T10:30:00Z",
@@ -66,6 +66,7 @@ export const mockApplications: LeaveApplication[] = [
     startDate: "2025-05-15",
     endDate: "2025-05-16",
     reason: "Medical appointment",
+    applicationLetter: "I have a medical appointment and request leave for these dates.",
     status: "approved_by_faculty",
     createdAt: "2025-05-07T11:20:00Z",
     updatedAt: "2025-05-07T14:45:00Z",
@@ -80,6 +81,7 @@ export const mockApplications: LeaveApplication[] = [
     startDate: "2025-05-12",
     endDate: "2025-05-13",
     reason: "Personal emergency",
+    applicationLetter: "Due to a personal emergency, I need leave for two days.",
     status: "approved_by_hod",
     createdAt: "2025-05-06T09:15:00Z",
     updatedAt: "2025-05-07T16:30:00Z",
@@ -94,6 +96,7 @@ export const mockApplications: LeaveApplication[] = [
     startDate: "2025-05-20",
     endDate: "2025-05-25",
     reason: "Attending a conference",
+    applicationLetter: "I am attending a conference and request leave for the mentioned dates.",
     status: "approved",
     createdAt: "2025-05-05T08:45:00Z",
     updatedAt: "2025-05-07T17:20:00Z",
@@ -108,6 +111,7 @@ export const mockApplications: LeaveApplication[] = [
     startDate: "2025-05-18",
     endDate: "2025-05-19",
     reason: "Family emergency",
+    applicationLetter: "I have a family emergency and kindly request leave for two days.",
     status: "rejected",
     rejectedBy: "faculty",
     rejectionReason: "Insufficient explanation provided",

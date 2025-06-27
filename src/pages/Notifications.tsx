@@ -6,6 +6,9 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Bell, Check, Clock, X } from "lucide-react";
 import { useState } from "react";
+import { useNotification } from "@/context/NotificationContext";
+import { motion } from "framer-motion";
+import { pageFade, cardMotion, buttonMotion } from "@/lib/motion";
 
 interface Notification {
   id: string;
@@ -16,51 +19,16 @@ interface Notification {
   type: 'info' | 'success' | 'warning' | 'error';
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    title: "Leave Application Approved",
-    message: "Your leave application for May 10-15 has been approved by the faculty.",
-    timestamp: "2023-05-05T10:30:00Z",
-    read: false,
-    type: "success"
-  },
-  {
-    id: "2",
-    title: "Reminder: Pending HOD Approval",
-    message: "Your application is waiting for HOD approval. This is a reminder.",
-    timestamp: "2023-05-03T14:15:00Z",
-    read: false,
-    type: "info"
-  },
-  {
-    id: "3",
-    title: "Additional Information Required",
-    message: "Please provide supporting documents for your leave application dated April 20-22.",
-    timestamp: "2023-04-18T09:45:00Z",
-    read: true,
-    type: "warning"
-  },
-  {
-    id: "4",
-    title: "Leave Application Rejected",
-    message: "Your leave application for March 15-18 has been rejected. Reason: Insufficient information provided.",
-    timestamp: "2023-03-14T11:20:00Z",
-    read: true,
-    type: "error"
-  },
-  {
-    id: "5",
-    title: "New Announcement",
-    message: "The college will be closed on May 25th for maintenance work.",
-    timestamp: "2023-05-01T08:00:00Z",
-    read: true,
-    type: "info"
-  }
-];
-
 const Notifications = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const { 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead, 
+    deleteNotification, 
+    clearAllNotifications 
+  } = useNotification();
+  
   const [notificationSettings, setNotificationSettings] = useState({
     email: true,
     push: true,
@@ -77,24 +45,6 @@ const Notifications = () => {
       hour: '2-digit',
       minute: '2-digit'
     }).format(date);
-  };
-
-  const markAsRead = (id: string) => {
-    setNotifications(notifications.map(notification => 
-      notification.id === id ? { ...notification, read: true } : notification
-    ));
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(notification => ({ ...notification, read: true })));
-  };
-
-  const deleteNotification = (id: string) => {
-    setNotifications(notifications.filter(notification => notification.id !== id));
-  };
-
-  const clearAllNotifications = () => {
-    setNotifications([]);
   };
 
   const handleSettingChange = (setting: string, value: boolean) => {
@@ -117,14 +67,12 @@ const Notifications = () => {
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-
   return (
-    <div className="animate-in max-w-4xl mx-auto">
+    <motion.div className="animate-in max-w-4xl mx-auto bg-gray-50 dark:bg-zinc-900 min-h-screen" {...pageFade}>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Notifications</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Notifications</h1>
+          <p className="text-muted-foreground dark:text-gray-300">
             {unreadCount === 0 
               ? "You're all caught up!" 
               : `You have ${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}`}
@@ -147,74 +95,78 @@ const Notifications = () => {
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-4">
           {notifications.length === 0 ? (
-            <Card>
+            <Card className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800">
               <CardContent className="flex flex-col items-center justify-center p-6">
-                <Bell className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground text-center">
+                <Bell className="h-12 w-12 text-muted-foreground dark:text-gray-400 mb-4" />
+                <p className="text-muted-foreground dark:text-gray-400 text-center">
                   No notifications to display
                 </p>
-                <p className="text-sm text-muted-foreground text-center mt-2">
+                <p className="text-sm text-muted-foreground dark:text-gray-400 text-center mt-2">
                   New notifications will appear here
                 </p>
               </CardContent>
             </Card>
           ) : (
             notifications.map((notification) => (
-              <Card key={notification.id} className={!notification.read ? "border-l-4 border-l-primary" : ""}>
-                <CardHeader className="pb-2 flex flex-row items-start justify-between">
+              <motion.div key={notification.id} className={`bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 ${!notification.read ? "border-l-4 border-l-primary dark:border-l-blue-400" : ""}`} {...cardMotion}>
+                <CardHeader className="pb-2 flex flex-row items-start justify-between border-b border-gray-100 dark:border-zinc-800">
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5">
                       {getNotificationIcon(notification.type)}
                     </div>
                     <div>
-                      <CardTitle className="text-base">{notification.title}</CardTitle>
-                      <CardDescription className="text-xs">
+                      <CardTitle className="text-base text-gray-900 dark:text-gray-100">{notification.title}</CardTitle>
+                      <CardDescription className="text-xs dark:text-gray-400">
                         {formatDate(notification.timestamp)}
                       </CardDescription>
                     </div>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8" 
-                    onClick={() => deleteNotification(notification.id)}
-                  >
-                    <X className="h-4 w-4" />
-                    <span className="sr-only">Delete</span>
-                  </Button>
+                  <motion.div {...buttonMotion}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-zinc-700 dark:hover:text-gray-200"
+                      onClick={() => deleteNotification(notification.id)}
+                    >
+                      <X className="h-4 w-4 text-gray-600 dark:text-gray-400 transition-colors" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </motion.div>
                 </CardHeader>
-                <CardContent className="pb-3">
-                  <p className="text-sm">{notification.message}</p>
+                <CardContent className="pt-6 pb-6">
+                  <p className="text-sm text-gray-900 dark:text-gray-100">{notification.message}</p>
                 </CardContent>
                 {!notification.read && (
                   <CardFooter className="pt-0">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => markAsRead(notification.id)}
-                      className="text-sm h-8"
-                    >
-                      Mark as read
-                    </Button>
+                    <motion.div {...buttonMotion}>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => markAsRead(notification.id)}
+                        className="text-sm h-8"
+                      >
+                        Mark as read
+                      </Button>
+                    </motion.div>
                   </CardFooter>
                 )}
-              </Card>
+              </motion.div>
             ))
           )}
         </div>
 
-        <Card className="h-fit">
+        <Card className="h-fit bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800">
           <CardHeader>
-            <CardTitle>Notification Settings</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-gray-900 dark:text-gray-100">Notification Settings</CardTitle>
+            <CardDescription className="dark:text-gray-400">
               Customize how you receive notifications
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <div className="space-y-4">
-              <h3 className="text-sm font-medium">Delivery Methods</h3>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Delivery Methods</h3>
               <div className="flex items-center justify-between">
-                <Label htmlFor="email-notifications" className="flex items-center gap-2 cursor-pointer">
+                <Label htmlFor="email-notifications" className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100">
                   Email Notifications
                 </Label>
                 <Switch 
@@ -224,7 +176,7 @@ const Notifications = () => {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="push-notifications" className="flex items-center gap-2 cursor-pointer">
+                <Label htmlFor="push-notifications" className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100">
                   Push Notifications
                 </Label>
                 <Switch 
@@ -235,10 +187,10 @@ const Notifications = () => {
               </div>
             </div>
 
-            <Separator />
+            <Separator className="bg-gray-100 dark:bg-zinc-800" />
 
             <div className="space-y-4">
-              <h3 className="text-sm font-medium">Notification Types</h3>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Notification Types</h3>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Checkbox 
@@ -250,7 +202,7 @@ const Notifications = () => {
                   />
                   <label
                     htmlFor="application-updates"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-900 dark:text-gray-100"
                   >
                     Application status updates
                   </label>
@@ -265,7 +217,7 @@ const Notifications = () => {
                   />
                   <label
                     htmlFor="system-announcements"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-900 dark:text-gray-100"
                   >
                     System announcements
                   </label>
@@ -280,7 +232,7 @@ const Notifications = () => {
                   />
                   <label
                     htmlFor="reminders"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-900 dark:text-gray-100"
                   >
                     Reminders
                   </label>
@@ -293,7 +245,7 @@ const Notifications = () => {
           </CardFooter>
         </Card>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

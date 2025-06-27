@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useApplication } from "@/context/ApplicationContext";
 import { useAuth } from "@/context/AuthContext";
 import { LeaveApplication } from "@/types";
-import { CheckIcon, XIcon } from "lucide-react";
+import { CheckIcon, XIcon, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -240,7 +240,7 @@ const ViewApplications = () => {
   };
   
   return (
-    <div className="animate-in">
+    <div className="animate-in max-w-5xl mx-auto px-2 md:px-0">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">
           {user?.role === "faculty" && "Student Leave Applications"}
@@ -248,18 +248,18 @@ const ViewApplications = () => {
             ? "Faculty Leave Applications" 
             : "Department Leave Applications"}
           {user?.role === "principal" && "All Leave Applications"}
+          {user?.role === "student" && "My Leave Applications"}
         </h1>
         <p className="text-muted-foreground">Review and manage leave applications</p>
       </div>
-      
-      <div className="grid gap-8 md:grid-cols-[300px_1fr]">
+      <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] gap-6">
         {/* Applications List */}
-        <Card className="h-[calc(100vh-200px)] flex flex-col">
+        <Card className="h-full flex flex-col">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Applications</CardTitle>
             <div className="flex flex-col space-y-2 mt-2">
               <Input 
-                placeholder="Search by student name" 
+                placeholder="Search by student name or ID" 
                 value={searchQuery}
                 onChange={handleSearch}
               />
@@ -278,35 +278,50 @@ const ViewApplications = () => {
               </Select>
             </div>
           </CardHeader>
-          <CardContent className="flex-1 overflow-auto">
+          <CardContent className="flex-1 overflow-y-auto p-0">
             {filteredApplications.length > 0 ? (
-              <div className="space-y-2">
+              <div className="divide-y">
                 {filteredApplications.map((app) => (
                   <div
                     key={app.id}
-                    className={`p-3 rounded-md border cursor-pointer transition-colors ${
-                      selectedApplication?.id === app.id
-                        ? "bg-cams-50 border-cams-300"
-                        : "hover:bg-muted/40"
-                    }`}
+                    className={`flex items-center justify-between gap-2 px-4 py-3 cursor-pointer transition-all group
+                      ${selectedApplication?.id === app.id ? "bg-blue-50 border-l-4 border-blue-600" : "hover:bg-muted/40"}`}
                     onClick={() => handleSelectApplication(app)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`View application for ${app.studentName}`}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <p className="font-medium">{app.studentName}</p>
-                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(app.status)}`}>
-                        {getStatusDisplay(app.status)}
-                      </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center mb-1">
+                        <p className="font-medium truncate">{app.studentName}</p>
+                        <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(app.status)}`}>
+                          {getStatusDisplay(app.status)}
+                        </span>
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        <span>{app.department}, {app.year} Year, {app.section}</span>
+                        <span className="mx-2">·</span>
+                        <span>{new Date(app.startDate).toLocaleDateString()} - {new Date(app.endDate).toLocaleDateString()}</span>
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      <p>{app.department}, {app.year} Year, {app.section}</p>
-                      <p>{new Date(app.startDate).toLocaleDateString()} - {new Date(app.endDate).toLocaleDateString()}</p>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      tabIndex={-1}
+                      aria-label="View details"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground">
-                <p>No applications found</p>
+              <div className="h-full flex items-center justify-center text-muted-foreground p-6">
+                <div className="text-center">
+                  <h3 className="text-lg font-medium mb-2">No applications found</h3>
+                  <p className="text-sm">You haven't submitted any leave applications yet.</p>
+                </div>
               </div>
             )}
           </CardContent>
@@ -314,26 +329,25 @@ const ViewApplications = () => {
             {filteredApplications.length} application(s) found
           </CardFooter>
         </Card>
-        
         {/* Application Details */}
-        <Card className="h-[calc(100vh-200px)] flex flex-col">
-          {selectedApplication ? (
-            <>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle>Leave Application Details</CardTitle>
-                    <CardDescription>
-                      Submitted on {new Date(selectedApplication.createdAt).toLocaleDateString()}
-                    </CardDescription>
+        <div className="w-full">
+          <Card className="h-full">
+            {selectedApplication ? (
+              <>
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle>Leave Application Details</CardTitle>
+                      <CardDescription>
+                        Submitted on {new Date(selectedApplication.createdAt).toLocaleDateString()}
+                      </CardDescription>
+                    </div>
+                    <div className={`px-3 py-1 rounded-md text-sm font-medium ${getStatusColor(selectedApplication.status)}`}>
+                      {getStatusDisplay(selectedApplication.status)}
+                    </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-md text-sm font-medium ${getStatusColor(selectedApplication.status)}`}>
-                    {getStatusDisplay(selectedApplication.status)}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1 overflow-auto">
-                <div className="space-y-6">
+                </CardHeader>
+                <CardContent className="flex-1 overflow-auto space-y-6">
                   <div>
                     <h3 className="text-sm font-medium mb-2">Student Information</h3>
                     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
@@ -355,9 +369,7 @@ const ViewApplications = () => {
                       </div>
                     </div>
                   </div>
-                  
                   <Separator />
-                  
                   <div>
                     <h3 className="text-sm font-medium mb-2">Leave Details</h3>
                     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
@@ -381,144 +393,23 @@ const ViewApplications = () => {
                       </div>
                     </div>
                   </div>
-                  
                   <div>
                     <h3 className="text-sm font-medium mb-2">Reason for Leave</h3>
                     <div className="rounded-md border p-3 bg-muted/40">
                       <p>{selectedApplication.reason}</p>
                     </div>
                   </div>
-                  
-                  {selectedApplication.status === "rejected" && (
-                    <div>
-                      <h3 className="text-sm font-medium mb-2">Rejection Reason</h3>
-                      <div className="rounded-md border p-3 bg-muted/40">
-                        <p className="text-sm mb-2">
-                          <span className="text-muted-foreground">Rejected by: </span>
-                          <span className="capitalize">{selectedApplication.rejectedBy}</span>
-                        </p>
-                        <p>{selectedApplication.rejectionReason}</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Application Timeline</h3>
-                    <div className="space-y-3">
-                      <div className="flex gap-3 items-start">
-                        <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center">
-                          <CheckIcon className="h-3 w-3 text-green-700" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Application Submitted</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(selectedApplication.createdAt).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      {(selectedApplication.status === "approved_by_faculty" || 
-                        selectedApplication.status === "approved_by_hod" || 
-                        selectedApplication.status === "approved") && (
-                        <div className="flex gap-3 items-start">
-                          <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center">
-                            <CheckIcon className="h-3 w-3 text-green-700" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Approved by Faculty</p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(selectedApplication.updatedAt).toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {(selectedApplication.status === "approved_by_hod" || 
-                        selectedApplication.status === "approved") && (
-                        <div className="flex gap-3 items-start">
-                          <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center">
-                            <CheckIcon className="h-3 w-3 text-green-700" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Approved by HOD</p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(selectedApplication.updatedAt).toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {selectedApplication.status === "approved" && (
-                        <div className="flex gap-3 items-start">
-                          <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center">
-                            <CheckIcon className="h-3 w-3 text-green-700" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">Approved by Principal</p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(selectedApplication.updatedAt).toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {selectedApplication.status === "rejected" && (
-                        <div className="flex gap-3 items-start">
-                          <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center">
-                            <XIcon className="h-3 w-3 text-red-700" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">
-                              Application Rejected by <span className="capitalize">{selectedApplication.rejectedBy}</span>
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(selectedApplication.updatedAt).toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between border-t p-6">
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setSelectedApplication(null);
-                    navigate(location.pathname);
-                  }}
-                >
-                  Close
-                </Button>
-                
-                {canTakeAction(selectedApplication) && (
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="destructive" 
-                      onClick={handleOpenRejectDialog}
-                    >
-                      Reject
-                    </Button>
-                    <Button 
-                      className="bg-green-600 hover:bg-green-700"
-                      onClick={handleApprove}
-                    >
-                      Approve
-                    </Button>
-                  </div>
-                )}
-              </CardFooter>
-            </>
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-6">
-              <h3 className="text-lg font-medium mb-2">No application selected</h3>
-              <p className="text-center mb-4">Select an application from the list to view details</p>
-            </div>
-          )}
-        </Card>
+                </CardContent>
+              </>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-6">
+                <h3 className="text-lg font-medium mb-2">No application selected</h3>
+                <p className="text-center mb-4">Select an application from the list to view details</p>
+              </div>
+            )}
+          </Card>
+        </div>
       </div>
-      
       {/* Rejection Dialog */}
       <Dialog open={showRejectionDialog} onOpenChange={setShowRejectionDialog}>
         <DialogContent>
@@ -528,7 +419,6 @@ const ViewApplications = () => {
               Please provide a reason for rejecting this application
             </DialogDescription>
           </DialogHeader>
-          
           <div className="grid gap-4 py-4">
             <Label htmlFor="rejectionReason">Reason for Rejection</Label>
             <Textarea
@@ -539,7 +429,6 @@ const ViewApplications = () => {
               className="min-h-[100px]"
             />
           </div>
-          
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRejectionDialog(false)}>
               Cancel
